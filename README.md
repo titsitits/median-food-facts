@@ -16,32 +16,30 @@ File 2 includes a filtered version of the dataset, keeping only items with at le
 
 The extraction of this dataset from the original data source was obtained through a pipeline of information processing steps, including Natural Language Processing (for product disambiguation), statistics and filtering. It was then augmented through automatic web crawling on a generic search engine (StartPage [2]). The quality of this dataset is hence limited to the current state of the OpenfoodFacts platform (as of 23 January 2020), and to the limited reliability of the automatic text processing of search engine request results.
 
-### Conversion to a lightweight column-wise compressed format
+### Data cleaning, filtering and compression
 
-The original data extracted from the OpenFoodFacts platform are in the form of a large table, that can be exported as a “csv” file (about 2.2Go as of 23 January 2020). This table contains highly redundant information, including a large number of identical values or empty cells. Its size can therefore be significantly reduced by using a colum-wise compression method, such as Apache Parquet [3].
+The original data extracted from the OpenFoodFacts platform are in the form of a large table, that can be ). This table contains highly redundant information, including a large number of identical values, empty cells or invalid values. Its size can therefore be significantly reduced by filtering useless data, and by using a colum-wise compression method, such as Apache Parquet [3].
 
-
-
-This compression to a parquet file allowed to reduce the 
-
-### Data cleaning
-
-The original french nutritional facts dataset downloaded from the OpenFoodFacts platform (accessible here: https://fr.openfoodfacts.org/data/fr.openfoodfacts.org.products.csv ) contains a large number of missing or invalid data, see Table 1.
+The original french nutritional facts dataset was downloaded from the OpenFoodFacts platform, exported as a “csv” file of about 2.2Go - as of 23 January 2020 - accessible here: https://fr.openfoodfacts.org/data/fr.openfoodfacts.org.products.csv . Table 1 indicates statistics about the initial data quality.
 
  
 
-| Dataset (table) characteristics                         |           |
-| ------------------------------------------------------- | --------- |
-| Nb of lines (food products)                             | 1120758   |
-| Nb of columns (variables, including nutritional  facts) | 178       |
-| Nb of empty columns                                     | 112 (63%) |
-| Nb of missing values (table cells)                      |           |
+| Dataset (table) characteristics                         |                 |
+| ------------------------------------------------------- | --------------- |
+| Nb of lines (food products)                             | 1120758         |
+| Nb of columns (variables, including nutritional  facts) | 178             |
+| Nb of columns  with > 90% empty values                  | 112 (63%)       |
+| Nb of missing values (table cells)                      | 157884457 (79%) |
+| Nb of missing energy information (kCal/100g)            | 229799 (20%)    |
+| Nb of invalid energy information (> 1000 kCal/100g)     | 1172 (0.1%)     |
 
 Table 1. Characteristics of the original OpenfoodFacts dataset, as of 23 January 2020.
 
-Moreover, products with irrelevant values were found in the dataset (such as  energy values > 10^6 kCal/100g, probably due to contributor typing error).
+A subset of the original dataset is therefore extracted to keep only relevant data. After data filtering, the dataset comprised 837463 lines, i.e. 75% of the original dataset.
 
-A subset of the original dataset is therefore extracted to keep only relevant data (further reducing the size of the initial dataset).
+The dataset includes products from various countries worldwide. As the zone of interest for the project is in Belgium, and the language of interest if french, only products from local french-speaking countries (i.e. France, Belgium, and Switzerland) were kept. The resulting dataset comprised 391017 lines, i.e. 35% of the original dataset.
+
+Finally, the file was saved into a parquet file using gzip compression. The final size of the file is about 75Mo.
 
 ### Product disambiguation
 
@@ -49,11 +47,13 @@ The products referenced in the OpenFoodFacts platform include various occurrence
 
 ### Usual products extraction
 
-In order to obtain a set of usual products, the number of occurrences for each unique product (after disambiguation) was counted. A threshold is arbitrarily defined to 5 occurrences of an identical name, to consider that product "usual". Based on this threshold, a subset of usual products was extracted from the initial dataset.
+In order to obtain a set of usual products, the number of occurrences for each unique product (after disambiguation) was counted. A threshold is arbitrarily defined to 5 occurrences of an identical name, to consider that product "usual". Based on this threshold, a subset of usual products was extracted from the initial dataset, resulting in 131509 products (i.e. 12% of the original dataset).
 
 ### Median dataset extraction
 
 Many nutritional values are given for each product, with more or less consistent values. In order to obtain a robust estimate of the nutritional values for a unique product, a median is calculated on products corresponding to the same name. Median is used as it is known to filter noisy data. The more occurrences in the initial dataset, the more robust estimation of the product median nutritional facts. More usual products are therefore more prone to be more accurately described in this subset.
+
+A median dataset was extracted both the the usual product subset and the unfiltered dataset (including unusual products), resulting respectively in 8470 and 228649 products.
 
 ### Data augmentation through web crawling
 
