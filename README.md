@@ -8,17 +8,17 @@ This repository presents a new open-source dataset of general nutritional facts,
 
 This dataset aims to provide more reliable and usable data about general nutritional facts, through cleaning, aggregation and filtering of the original dataset.
 
-File 1 includes the “raw” dataset, resulting from the extraction of median facts from all items of the OpenFoodFacts dataset.
+File 1 (allmedianfacts.parquet) includes the “raw” dataset, resulting from the extraction of median facts from all items of the OpenFoodFacts dataset.
 
-File 2 includes a filtered version of the dataset, keeping only items with at least 5 occurrences in the original data, allowing extraction of a reliable median value for each characteristic of the table (i.e. each nutritional fact).
+File 2 (medianfacts.parquet) includes a filtered version of the dataset, keeping only items with at least 5 occurrences in the original data, allowing extraction of a more reliable median value for each characteristic of the table (i.e. each nutritional fact).
 
 ## Experimental Design, Materials, and Methods 
 
-The extraction of this dataset from the original data source was obtained through a pipeline of information processing steps, including Natural Language Processing (for product disambiguation), statistics and filtering. It was then augmented through automatic web crawling on a generic search engine (StartPage [2]). The quality of this dataset is hence limited to the current state of the OpenfoodFacts platform (as of 23 January 2020), and to the limited reliability of the automatic text processing of search engine request results.
+The extraction of this dataset from the original data source was obtained through a pipeline of information processing steps, including basic Natural Language Processing (for product disambiguation), statistics and filtering. It was then augmented through automatic web crawling on a generic search engine (StartPage [2]), allowing estimation of the standard weight of common products. The quality of this dataset is hence limited to the current state of the OpenfoodFacts platform (as of 23 January 2020), and to the limited reliability of the automatic text processing of search engine request results.
 
 ### Data cleaning, filtering and compression
 
-The original data extracted from the OpenFoodFacts platform are in the form of a large table, that can be ). This table contains highly redundant information, including a large number of identical values, empty cells or invalid values. Its size can therefore be significantly reduced by filtering useless data, and by using a colum-wise compression method, such as Apache Parquet [3].
+The original data extracted from the OpenFoodFacts platform are in the form of a large table. This table contains highly redundant information, including a large number of identical values, empty cells or invalid values. Its size can therefore be significantly reduced by filtering useless data, and by using a colum-wise compression method, such as Apache Parquet [3].
 
 The original french nutritional facts dataset was downloaded from the OpenFoodFacts platform, exported as a “csv” file of about 2.2Go - as of 23 January 2020 - accessible here: https://fr.openfoodfacts.org/data/fr.openfoodfacts.org.products.csv . Table 1 indicates statistics about the initial data quality.
 
@@ -57,7 +57,7 @@ A median dataset was extracted both the the usual product subset and the unfilte
 
 ### Data augmentation through web crawling
 
-Generally, recipes indicates an absolute number of ingredients to use  ("take four tomatoes") rather than a total weight. To allow automatic extraction of nutritional facts for any food recipe, information about the unit weight of ingredients is therefore required. This type of information can be considered of the public domain (for a dietitian, a nutritionist or a cooker, it is known that the average - or median- weight of a tomatoe is about 100g). However, there is no exhaustive source indicating the unit weight of any product. A query on a search engine for various products will therefore point to various websites, providing this public-domain information.
+Generally, recipes indicate an absolute number of ingredients to use  ("take four tomatoes") rather than a total weight. To allow automatic extraction of nutritional facts for any food recipe, information about the unit weight of ingredients is therefore required. This type of information can be considered of the public domain (for a dietitian, a nutritionist or a cooker, it is known that the average - or median- weight of a tomatoe is about 100g). However, there is no exhaustive source indicating the unit weight of any product. A query on a search engine for various products will therefore point to various websites, providing this public-domain information.
 
 In order to provide this information for all products of our dataset, we developed a method for automatically extracting unit weight information from a query on a generic web search engine. From a query with the given keywords: "poids *produit* grammes" (e.g. "poids pomme grammes", meaning in english "weight apple grams"), a web search engine (Startpage was used in the experiment) returns various descriptions, from exerpts of various websites. Ideally, these exerpts are supposed to contains the search information, and therefore they contains ciffers followed a unit (such as g/grams, or kg/kilograms according to the product).
 
